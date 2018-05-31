@@ -1,0 +1,8 @@
+{
+  "presets": [
+    "latest",
+    "flow",
+    "react",
+    "stage-3"
+  ]
+}

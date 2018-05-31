@@ -1,0 +1,42 @@
+{
+  "name": "oxilor-immutable-js",
+  "version": "1.0.0",
+  "description": "Immutable data for JavaScript",
+  "license": "MIT",
+  "homepage": "https://github.com/oxilor/oxilor-immutable-js",
+  "author": {
+    "name": "Ilya Ordin",
+    "url": "https://github.com/oxilor"
+  },
+  "repository": {
+    "url": "https://github.com/oxilor/oxilor-immutable-js",
+    "type": "git"
+  },
+  "bugs": "https://github.com/oxilor/oxilor-immutable-js/issues",
+  "main": "src/immutable.js",
+  "private": false,
+  "scripts": {
+    "test": "jest",
+    "flow": "flow",
+    "flow-stop": "flow stop"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      ".mock.js"
+    ]
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.0.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "flow-bin": "0.73.0",
+    "jest": "23.1.0"
+  },
+  "keywords": [
+    "immutable"
+  ]
+}
