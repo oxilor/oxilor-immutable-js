@@ -24,7 +24,8 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     _path: [],
 
     /**
-     * Возвращает полный объект (игнорируя путь, выставленный в with)
+     * Возвращает измененный state в виде JS объекта
+     * Игнорирует путь, выставленный в with
      */
     getState: function (): any {
         return this._state
@@ -112,7 +113,8 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     },
 
     /**
-     * Изменяет элемент по заданному пути. Если элемент не существует, объект не меняется
+     * Изменяет элемент по заданному пути
+     * В отличии от set, если элемент не существует, state не меняется
      * @examples
      * .update(key, value)
      * .update([ key, key, key ], value)
@@ -126,7 +128,7 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     },
 
     /**
-     * Обновляет элементы в объекте или массиве. Используется callback для поиска элементов
+     * Обновляет элементы в объекте или массиве, используя callback для поиска элементов
      * @param callback - Callback для поиска элемента, который необходимо обновить
      * @param value
      * @param onlyFirstFound - Если true, обновляет только первый найденный элемент
@@ -178,7 +180,7 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     },
 
     /**
-     * Удаляет элементы в объекте или массиве. Используется callback для поиска элементов
+     * Удаляет элементы в объекте или массиве, используя callback для поиска элементов
      * @param callback - Callback для поиска элемента, который необходимо удалить
      * @param onlyFirstFound - Если true, удаляет только первый найденный элемент
      */
@@ -248,7 +250,7 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     },
 
     /**
-     * forEach по объекту или массиву по заданному пути
+     * Аналог forEach по объекту или массиву по заданному пути
      * @param callback
      * @param path - Путь до элемента относительно заданного пути
      */
@@ -263,7 +265,7 @@ const immutable = (state: any = {}, withMutations: boolean = false) => ({
     },
 
     /**
-     * filter по объекту или массиву по заданному пути
+     * Аналог filter по объекту или массиву по заданному пути
      * @param callback
      * @param path - Путь до элемента относительно заданного пути
      */
