@@ -1,19 +1,59 @@
+type PathT = null | string | number | Array<string | number>
+type findItemCallbackT = (item: any) => boolean
+
+type iterableCallbackT = (
+    currentElement: any,
+    key: string | number,
+    parentElement: Object | Array<any>
+) => any
+
+type callbackElementT = (
+    element: Object | Array<any>,
+    key: string | number
+) => void
+
+interface IImmutable {
+    _state: any,
+    _path: Array<string | number>,
+
+    getState: () => any,
+    with: (path: PathT, savePrevPath?: boolean) => this,
+    unwith: () => this,
+    get: (path?: PathT) => any,
+    set: (path: PathT, value: any) => this,
+    update: (path: PathT, value: any) => this,
+    updateBy: (callback: findItemCallbackT, value: any, onlyFirstFound?: boolean) => this,
+    remove: (path: PathT) => this,
+    removeBy: (callback: findItemCallbackT, onlyFirstFound?: boolean) => this,
+    updateKey: (path: PathT, newKey: string | number) => this,
+    merge: (data: object | Array<any>, path?: PathT) => this,
+    push: (value: any, path?: PathT) => this,
+    forEach: (callback: iterableCallbackT, path?: PathT) => this,
+    filter: (callback: iterableCallbackT, path?: PathT) => this,
+    has: (path: PathT) => boolean,
+
+    _getPath: (path?: PathT) => Array<string | number>,
+    _getElement: (callback: callbackElementT, path?: PathT, withRoot?: boolean) => this,
+}
+
 /**
  * Immutable методы для работы с JS-объектом
  * @param state - Объект, над которым будут производиться операции. Передаваемый объект не будет изменен
  * @param withMutations - Если true, будет изменяться передаваемый объект
  * @author Ilya Ordin
  */
-const immutable = (state = {}, withMutations = false) => ({
+const immutable = (state: any = {}, withMutations: boolean = false): IImmutable => ({
     _state: withMutations ? state : _cloneElement(state),
     _path: [],
+
     /**
      * Возвращает измененный state в виде JS объекта
      * Игнорирует путь, выставленный в with
      */
-    getState: function () {
-        return this._state;
+    getState: function (): any {
+        return this._state
     },
+
     /**
      * Устанавливает путь до элемента, относительно которого будут производиться дальнейшие операции
      * @examples
@@ -22,21 +62,24 @@ const immutable = (state = {}, withMutations = false) => ({
      * @param path - Путь до элемента относительно заданного пути
      * @param savePrevPath - Если true, то путь будет браться относительно пред. пути
      */
-    with: function (path, savePrevPath = false) {
-        if (!savePrevPath)
-            this.unwith();
+    with: function (path: PathT, savePrevPath: boolean = false) {
+        if (!savePrevPath) this.unwith()
+
         if (this.has(path)) {
-            this._path = this._getPath(path);
+            this._path = this._getPath(path)
         }
-        return this;
+
+        return this
     },
+
     /**
      * Сбрасывает путь до выбранного элемента
      */
     unwith: function () {
-        this._path = [];
-        return this;
+        this._path = []
+        return this
     },
+
     /**
      * Возвращает элемент по заданному пути
      * Если элемент не существует, возвращает undefined
@@ -46,19 +89,21 @@ const immutable = (state = {}, withMutations = false) => ({
      * .get([ key, key, key ])
      * @param path - Путь до элемента относительно заданного пути
      */
-    get: function (path = null) {
-        let fullPath = this._getPath(path);
-        let element = this._state;
+    get: function (path: PathT = null): any {
+        let fullPath = this._getPath(path)
+        let element = this._state
+
         for (let key of fullPath) {
             if (_hasProp(element, key)) {
-                element = element[key];
-            }
-            else {
-                return undefined;
+                element = element[key]
+            } else {
+                return undefined
             }
         }
-        return element;
+
+        return element
     },
+
     /**
      * Создает или изменяет элемент по заданному пути
      * @examples
@@ -67,25 +112,29 @@ const immutable = (state = {}, withMutations = false) => ({
      * @param path - Путь до элемента относительно заданного пути
      * @param value
      */
-    set: function (path, value) {
-        let fullPath = this._getPath(path);
-        let element = this._state;
-        if (fullPath.length === 0)
-            this._state = value;
+    set: function (path: PathT, value: any) {
+        let fullPath = this._getPath(path)
+        let element = this._state
+
+        if (fullPath.length === 0) this._state = value
+
         for (let i = 0; i < fullPath.length; i++) {
-            let key = fullPath[i];
+            let key = fullPath[i]
+
             if (i === fullPath.length - 1) {
-                element[key] = value;
-            }
-            else if (_hasProp(element, key)) {
-                element = element[key];
-            }
-            else {
+                element[key] = value
+
+            } else if (_hasProp(element, key)) {
+                element = element[key]
+
+            } else {
                 break;
             }
         }
-        return this;
+
+        return this
     },
+
     /**
      * Изменяет элемент по заданному пути
      * В отличии от set, если элемент не существует, state не меняется
@@ -95,40 +144,45 @@ const immutable = (state = {}, withMutations = false) => ({
      * @param path - Путь до элемента относительно заданного пути
      * @param value
      */
-    update: function (path, value) {
-        return this._getElement((element, key) => {
-            element[key] = value;
-        }, path);
+    update: function (path: PathT, value: any) {
+        return this._getElement((element: Array<any> | object, key: any) => {
+            element[key] = value
+        }, path)
     },
+
     /**
      * Обновляет элементы в объекте или массиве, используя callback для поиска элементов
      * @param callback - Callback для поиска элемента, который необходимо обновить
      * @param value
      * @param onlyFirstFound - Если true, обновляет только первый найденный элемент
      */
-    updateBy: function (callback, value, onlyFirstFound = true) {
-        return this._getElement((element, key) => {
+    updateBy: function(
+        callback: findItemCallbackT,
+        value: any,
+        onlyFirstFound: boolean = true
+    ) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isArray(element[key])) {
                 for (let i = 0; i < element[key].length; i++) {
-                    if (callback(element[key][i])) {
-                        element[key][i] = value;
-                        if (onlyFirstFound)
-                            break;
+                    if (callback( element[key][i] )) {
+                        element[key][i] = value
+                        if (onlyFirstFound) break;
                     }
                 }
-            }
-            else if (_isObject(element[key])) {
-                const keys = Object.keys(element[key]);
+
+            } else if (_isObject(element[key])) {
+                const keys = Object.keys(element[key])
+
                 for (let i = 0; i < keys.length; i++) {
-                    if (callback(element[key][keys[i]])) {
-                        element[key][keys[i]] = value;
-                        if (onlyFirstFound)
-                            break;
+                    if (callback( element[key][ keys[i] ] )) {
+                        element[key][ keys[i] ] = value
+                        if (onlyFirstFound) break;
                     }
                 }
             }
-        }, null, true);
+        }, null, true)
     },
+
     /**
      * Удаляет элемент по заданному пути
      * @examples
@@ -136,45 +190,47 @@ const immutable = (state = {}, withMutations = false) => ({
      * .remove([ key, key, key ])
      * @param path - Путь до элемента относительно заданного пути
      */
-    remove: function (path) {
-        return this._getElement((element, key) => {
+    remove: function (path: PathT) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isArray(element)) {
                 // @ts-ignore
-                element.splice(key, 1);
+                element.splice(key, 1)
+
+            } else if (_isObject(element)) {
+                delete element[key]
             }
-            else if (_isObject(element)) {
-                delete element[key];
-            }
-        }, path);
+
+        }, path)
     },
+
     /**
      * Удаляет элементы в объекте или массиве, используя callback для поиска элементов
      * @param callback - Callback для поиска элемента, который необходимо удалить
      * @param onlyFirstFound - Если true, удаляет только первый найденный элемент
      */
-    removeBy: function (callback, onlyFirstFound = true) {
-        return this._getElement((element, key) => {
+    removeBy: function (callback: findItemCallbackT, onlyFirstFound: boolean = true) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isArray(element[key])) {
                 for (let i = 0; i < element[key].length; i++) {
-                    if (callback(element[key][i])) {
-                        element[key].splice(i, 1);
-                        if (onlyFirstFound)
-                            break;
+                    if (callback( element[key][i] )) {
+                        element[key].splice(i, 1)
+                        if (onlyFirstFound) break;
                     }
                 }
-            }
-            else if (_isObject(element[key])) {
-                const keys = Object.keys(element[key]);
+
+            } else if (_isObject(element[key])) {
+                const keys = Object.keys(element[key])
+
                 for (let i = 0; i < keys.length; i++) {
-                    if (callback(element[key][keys[i]])) {
-                        delete element[key][keys[i]];
-                        if (onlyFirstFound)
-                            break;
+                    if (callback( element[key][ keys[i] ] )) {
+                        delete element[key][ keys[i] ]
+                        if (onlyFirstFound) break;
                     }
                 }
             }
-        }, null, true);
+        }, null, true)
     },
+
     /**
      * Обновляет ключ по заданному пути
      * @examples
@@ -183,106 +239,115 @@ const immutable = (state = {}, withMutations = false) => ({
      * @param path - Путь до элемента относительно заданного пути
      * @param newKey - Новый ключ
      */
-    updateKey: function (path, newKey) {
-        return this._getElement((element, key) => {
-            element[newKey] = element[key];
-            delete element[key];
-        }, path);
+    updateKey: function (path: PathT, newKey: string | number) {
+        return this._getElement((element: Array<any> | object, key: any) => {
+            element[newKey] = element[key]
+            delete element[key]
+        }, path)
     },
+
     /**
      * Объединяет элементы в объекте или массиве
      * @param data
      * @param path - Путь до элемента относительно заданного пути
      */
-    merge: function (data, path = null) {
-        data = _cloneElement(data);
-        return this._getElement((element, key) => {
+    merge: function (data: object | Array<any>, path: PathT = null) {
+        data = _cloneElement(data)
+
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isObject(element[key]) && _isObject(data)) {
-                element[key] = Object.assign({}, element[key], data);
-            }
-            else if (_isArray(element[key]) && _isArray(data)) {
+                element[key] = { ...element[key], ...data }
+
+            } else if (_isArray(element[key]) && _isArray(data)) {
                 // @ts-ignore
-                element[key] = [...element[key], ...data];
+                element[key] = [ ...element[key], ...data ]
             }
-        }, path, true);
+        }, path, true)
     },
+
     /**
      * Добавляет новый элемент в массиве
      * @param value
      * @param path - Путь до элемента относительно заданного пути
      */
-    push: function (value, path = null) {
-        return this._getElement((element, key) => {
+    push: function (value: any, path: PathT = null) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isArray(element[key])) {
-                element[key].push(value);
+                element[key].push(value)
             }
-        }, path, true);
+        }, path, true)
     },
+
     /**
      * Аналог forEach по объекту или массиву по заданному пути
      * @param callback
      * @param path - Путь до элемента относительно заданного пути
      */
-    forEach: function (callback, path = null) {
-        return this._getElement((element, key) => {
+    forEach: function (callback: iterableCallbackT, path: PathT = null) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             for (let localKey in element[key]) {
                 if (element[key].hasOwnProperty(localKey)) {
-                    callback(immutable(element[key][localKey], true), localKey, element[key]);
+                    callback( immutable(element[key][localKey], true), localKey, element[key] )
                 }
             }
-        }, path, true);
+        }, path, true)
     },
+
     /**
      * Аналог filter по объекту или массиву по заданному пути
      * @param callback
      * @param path - Путь до элемента относительно заданного пути
      */
-    filter: function (callback, path = null) {
-        return this._getElement((element, key) => {
+    filter: function (callback: iterableCallbackT, path: PathT = null) {
+        return this._getElement((element: Array<any> | object, key: any) => {
             if (_isObject(element[key])) {
                 element[key] = Object.keys(element[key])
-                    .filter(localKey => callback(element[key][localKey], localKey, element[key]))
-                    .reduce((res, localKey) => Object.assign(res, { [localKey]: element[key][localKey] }), {});
+                    .filter( localKey => callback(element[key][localKey], localKey, element[key]) )
+                    .reduce( (res, localKey) => Object.assign(res, { [localKey]: element[key][localKey] }), {} )
+
+            } else if (_isArray(element[key])) {
+                element[key] = element[key].filter(callback)
             }
-            else if (_isArray(element[key])) {
-                element[key] = element[key].filter(callback);
-            }
-        }, path, true);
+        }, path, true)
     },
+
     /**
      * Проверяет существование элемента по заданному пути
      * @param path - Путь до элемента относительно заданного пути
      */
-    has: function (path) {
-        const fullPath = this._getPath(path);
-        let element = this._state;
+    has: function (path: PathT): boolean {
+        const fullPath = this._getPath(path)
+        let element = this._state
+
         for (let key of fullPath) {
             if (_hasProp(element, key)) {
-                element = element[key];
-            }
-            else {
-                return false;
+                element = element[key]
+            } else {
+                return false
             }
         }
-        return true;
+
+        return true
     },
+
     /**
      * Возвращает полный путь до элемента
      * @param path - Путь до элемента относительно заданного пути
      * @private
      */
-    _getPath: function (path = null) {
+    _getPath: function (path: PathT = null): Array<string | number> {
         if (path === null) {
-            return this._path;
-        }
-        else if (_isArray(path)) {
-            return this._path.concat(path);
-        }
-        else {
+            return this._path
+
+        } else if (_isArray(path)) {
+            return this._path.concat(path)
+
+        } else {
             // @ts-ignore
-            return [...this._path, path];
+            return [ ...this._path, path ]
         }
     },
+
     /**
      * Возвращает в callback элемент с ключем по заданному пути для чтения и записи, если элемент существует
      * @param callback
@@ -290,63 +355,72 @@ const immutable = (state = {}, withMutations = false) => ({
      * @param withRoot - Если true, при пустом пути возвращает корень
      * @private
      */
-    _getElement: function (callback, path = null, withRoot = false) {
-        let fullPath = this._getPath(path);
-        let element = this._state;
-        if (withRoot && fullPath.length === 0)
-            callback(this, '_state');
+    _getElement: function (
+        callback: callbackElementT,
+        path: PathT = null,
+        withRoot: boolean = false
+    ) {
+        let fullPath = this._getPath(path)
+        let element = this._state
+
+        if (withRoot && fullPath.length === 0) callback(this, '_state')
+
         for (let i = 0; i < fullPath.length; i++) {
-            let key = fullPath[i];
+            let key = fullPath[i]
+
             if (_hasProp(element, key)) {
                 if (i === fullPath.length - 1) {
-                    callback(element, key);
+                    callback(element, key)
+                } else {
+                    element = element[key]
                 }
-                else {
-                    element = element[key];
-                }
-            }
-            else {
+            } else {
                 break;
             }
         }
-        return this;
+
+        return this
     },
-});
+})
+
 /**
  * Проверяет является ли элемент объектом
  * @param element
  * @private
  */
-export const _isObject = (element) => {
+export const _isObject = (element: any): boolean => {
     return element !== null &&
-        Object.prototype.toString.call(element) === '[object Object]';
-};
+        Object.prototype.toString.call(element) === '[object Object]'
+}
+
 /**
  * Проверяет является ли элемент массивом
  * @param element
  * @private
  */
-export const _isArray = (element) => {
+export const _isArray = (element: any): boolean => {
     return element instanceof Array ||
-        Object.prototype.toString.call(element) === '[object Array]';
-};
+        Object.prototype.toString.call(element) === '[object Array]'
+}
+
 /**
  * Клонирует элемент
  * @param object
  * @private
  */
-const _cloneElement = (object) => {
-    return JSON.parse(JSON.stringify(object));
-};
+const _cloneElement = (object: any): any => {
+    return JSON.parse(JSON.stringify(object))
+}
+
 /**
  * Проверяет наличие свойства у объекта или индекса в массиве
  * @param element
  * @param key
  * @private
  */
-const _hasProp = (element, key) => {
+const _hasProp = (element: Object | Array<any>, key: any) => {
     return _isObject(element) && element.hasOwnProperty(key) ||
-        _isArray(element) && element[key] !== undefined;
-};
-export default immutable;
-//# sourceMappingURL=immutable.js.map
+        _isArray(element) && element[key] !== undefined
+}
+
+export default immutable

@@ -1,4 +1,5 @@
-import immutable from '../src/immutable';
+import immutable from '../src/immutable'
+
 const mockState = {
     '1': {
         '2': {
@@ -7,18 +8,20 @@ const mockState = {
         },
         'some': [1, 2, 3],
     }
-};
+}
+
 describe('Тестирование update', () => {
     test('Обновление объекта (без with)', () => {
-        const nextState = immutable(mockState);
-        nextState.update('1', { age: 20 });
+        const nextState = immutable(mockState)
+        nextState.update('1', { age: 20 })
         expect(nextState.getState()).toEqual({
             '1': { age: 20 }
-        });
-    });
+        })
+    })
+
     test('Обновление массива (c with)', () => {
-        const nextState = immutable(mockState);
-        nextState.with(['1', 'some']).update(0, 10);
+        const nextState = immutable(mockState)
+        nextState.with(['1', 'some']).update(0, 10)
         expect(nextState.getState()).toEqual({
             '1': {
                 '2': {
@@ -27,11 +30,12 @@ describe('Тестирование update', () => {
                 },
                 'some': [10, 2, 3],
             }
-        });
-    });
+        })
+    })
+
     test('Обновление несуществующего элемента', () => {
-        const nextState = immutable(mockState);
-        nextState.with('1').update('nothing', { age: 20 });
+        const nextState = immutable(mockState)
+        nextState.with('1').update('nothing', { age: 20 })
         expect(nextState.getState()).toEqual({
             '1': {
                 '2': {
@@ -40,7 +44,6 @@ describe('Тестирование update', () => {
                 },
                 'some': [1, 2, 3],
             }
-        });
-    });
-});
-//# sourceMappingURL=update.js.map
+        })
+    })
+})

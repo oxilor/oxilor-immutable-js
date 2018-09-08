@@ -56,6 +56,6 @@ const state = {
         permissions: ['one', 'two'],
         notifications: 30,
     },
-};
-export default state;
-//# sourceMappingURL=state.mock.js.map
+}
+
+export default state

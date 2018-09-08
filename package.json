@@ -1,6 +1,6 @@
 {
   "name": "oxilor-immutable-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Immutable data for JavaScript",
   "license": "MIT",
   "homepage": "https://github.com/oxilor/oxilor-immutable-js",
@@ -13,7 +13,7 @@
     "type": "git"
   },
   "bugs": "https://github.com/oxilor/oxilor-immutable-js/issues",
-  "main": "src/immutable.js",
+  "main": "src/immutable.ts",
   "private": false,
   "scripts": {
     "test": "jest",
@@ -27,6 +27,7 @@
     ]
   },
   "devDependencies": {
+    "@types/jest": "^23.3.2",
     "babel-core": "^6.26.3",
     "babel-jest": "^23.0.1",
     "babel-preset-flow": "^6.23.0",
